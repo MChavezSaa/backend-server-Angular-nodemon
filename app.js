@@ -26,7 +26,9 @@ app.listen(3000, ()=>{
     console.log('Express Server - puerto 3000 online');
 });
 
-app.put('/upload/producto',(req,res) =>{
+app.put('/upload/producto/:id',(req,res) =>{
+    let id= req.params.id;
+    
     if(!req.files){
         return res.status(400).json({
             ok: false,
@@ -45,6 +47,21 @@ app.put('/upload/producto',(req,res) =>{
             errors:{message: 'las extensiones validas son '+ extensioneValidas.join(',')}
         });
     }
+    let nombreArchivo = `${id}-${new Date().getMilliseconds()}.${extensionArchivo}`;
+    let path = `./uploads/productos/${nombreArchivo}`;
+    archivo.mv(path, err =>{
+        if(err){
+            return res.status(500).json({
+                ok:false,
+                mensaje: 'Error al mover archivo',
+                errors: err
+            });
+        }
+        return res.status(200).json({
+            ok:true,
+            mensaje:'Peticion realizada correctamente'
+        });
+    });
 });
 
 app.post('/producto', function(req, res){
