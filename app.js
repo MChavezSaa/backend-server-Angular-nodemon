@@ -34,7 +34,7 @@ app.put('/upload/producto',(req,res) =>{
             errors:{ message: 'Debe de seleccionar una imagen'}
         });
     }
-    let archivo = req.files.imagen;
+    let archivo = req.files.image;
     let nombreCortado = archivo.name.split('.');
     let extensionArchivo = nombreCortado[nombreCortado.length-1];
     let extensioneValidas = ['png','jpg', 'jpeg', 'gif'];
