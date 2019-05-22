@@ -27,7 +27,7 @@ app.listen(3000, ()=>{
 });
 
 app.put('/upload/producto',(req,res) =>{
-    if(!releaseEvents.files){
+    if(!req.files){
         return res.status(400).json({
             ok: false,
             mensaje: 'No selecciono nada',
