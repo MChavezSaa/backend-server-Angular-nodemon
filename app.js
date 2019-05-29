@@ -14,7 +14,7 @@ app.use(fileUpload());
 app.use(function(req, res,next){
     //enabling CORS
     res.header("Access-Control-Allow-Origin","*");
-    res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
+    res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
     res.header("Access-Control-Allow-Headers",
     "Origin, X-Requested-With, Content-Type, Accept, x-cliente-key, x-cliente-token, x-client-secret, Authorization");
     next();
@@ -34,6 +34,21 @@ mc.connect();
 //escuchar peticiones
 app.listen(3000, ()=>{
     console.log('Express Server - puerto 3000 online');
+});
+
+
+app.delete('/producto/:id', function(req,res){
+    //let id = req.body.id;
+    let id = req.params.id;
+    if(mc){
+        mc.query("DELETE FROM productos WHERE productId =?", id, function(error, result){
+            if(error){
+                return res.status(500).json({"Mensaje": "Error"});
+            }else{
+                return res.status(200).json({"Mensaje": "Registro con id= "+ id+" borrado"});
+            }
+        });
+    }
 });
 
 app.put('/upload/producto/:id',(req,res) =>{
