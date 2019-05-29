@@ -10,6 +10,16 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(fileUpload());
 
+//CORS middleware
+app.use(function(req, res,next){
+    //enabling CORS
+    res.header("Access-Control-Allow-Origin","*");
+    res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
+    res.header("Access-Control-Allow-Headers",
+    "Origin,X-Requested-With, Content-Type,Accept, x-cliente-key, x-cliente-token, x-client-secret, Authorization");
+    next();
+});
+
 //configurar conexion
 const mc= mysql.createConnection({
     host: 'localhost',
