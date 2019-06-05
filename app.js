@@ -37,6 +37,18 @@ app.listen(3000, ()=>{
 });
 
 
+app.get('/existeproducto/:id',(req, res, next)=>{
+    let id = req.params.id;
+    console.log('id '+id);
+    mc.query("SELECT * FROM productos WHERE productCode = ?", id, function(error, results,fields){
+        return res.send({
+            error: false,
+            data: results,
+            message: 'producto existe'
+        });
+    });
+});
+
 app.delete('/producto/:id', function(req,res){
     //let id = req.body.id;
     let id = req.params.id;
