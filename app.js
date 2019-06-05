@@ -52,8 +52,9 @@ app.delete('/producto/:id', function(req,res){
 });
 
 app.put('/upload/producto/:id',(req,res) =>{
-    let id= req.params.id;
-    
+   
+     let id= req.params.id;
+    console.log(id);
     if(!req.files){
         return res.status(400).json({
             ok: false,
@@ -108,6 +109,17 @@ app.post('/producto', function(req, res){
             }
         });
     }
+});
+app.put('/producto/:id', (req, res) => {
+    let id = req.params.id;
+    let producto = req.body;
+    if (!id || !producto) {
+        return res.status(400).send({ error: producto, message: 'Debe proveer un id y los datos de un producto' })
+    }
+    mc.query("UPDATE Productos SET ? WHERE productId = ?", [producto, id], function(error, result, fields) {
+        if (error) throw error;
+        return res.status(200).json({ "Mensaje": "Registro con id=" + id + "ha sido actualizado" });
+    });
 });
 
 app.get('/productos',function(req,res){
