@@ -4,9 +4,13 @@ const mysql = require('mysql');
 const bodyParser = require('body-parser');
 const fileUpload = require('express-fileupload');
 var bcrypt = require('bcrypt');
+var jwt = require('jsonwebtoken');
+
+var cors= require('cors') ;
 //inicializar variables
 var app = express();
 
+app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(fileUpload());
@@ -144,36 +148,13 @@ app.get('/productos',function(req,res){
     });
 });
 
-app.get('/',(req,res, next)=>{
+app.get('/',(req,res, next)=>{   
     res.status(200).json({
-        ok: true,
-        mensaje: 'Petición realizada correctamente'
-    })
-} );
+         ok: true,
+         mensaje: 'Petición realizada correctamente'
+     })
+ });
 
-app.post('/usuario', function(req,res){
-    let datosUsuario = {
-        //userId: campo auto incremental
-        userName: req.body.name,
-        userEmail: req.body.email,
-        userPassword: bcrypt.hashSync(req.body.password, 10),
-        userImg: req.body.img,
-        userRole: req.body.role
-    }; 
-    if(mc){
-        mc.query("INSERT INTO usuarios SET ?", datosUsuario, function(error,result){
-            if(error){
-                return res.status(200).json({
-                    ok: false, mensaje:'Error al crear usuario', errors: error
-                });
-            }else{
-                res.status(201).json({
-                    ok: true, usuario: result
-                });
-            }
-        });
-    }
-});
 
 app.post('/login', (req, res)=>{
     var body = req.body;
@@ -198,12 +179,57 @@ app.post('/login', (req, res)=>{
                     ok: false,
                     mensaje: 'Credenciales incorrectas - password',
                     errors: error
-                })
+                });
             }
+            //crear un token 
+            let SEED= 'esta-es-una-semilla';
+            let token= jwt.sign({usuario: results[0].userPassword},SEED,{expiresIn:14400});
             res.status(200).json({
                 ok: true,
                 usuario: results,
-                id:results[0].userId
+                id:results[0].userId,
+                token: token
             });        
     });
+});
+
+app.use('/', (req, res,next)=>{
+    let token= req.query.token;
+    let SEED = 'esta-es-una-semilla';
+    console.log(token);
+    jwt.verify(token,SEED,(err,decoded)=>{
+        if(err){
+            return res.status(401).json({
+                ok: false,
+                mensaje: 'token incorrecto',
+                errors:err
+            });
+        }
+        req.usuario = decoded.usuario;
+        next();
+    });
+});
+
+app.post('/usuario', function(req,res){
+    let datosUsuario = {
+        //userId: campo auto incremental
+        userName: req.body.name,
+        userEmail: req.body.email,
+        userPassword: bcrypt.hashSync(req.body.password, 10),
+        userImg: req.body.img,
+        userRole: req.body.role
+    }; 
+    if(mc){
+        mc.query("INSERT INTO usuarios SET ?", datosUsuario, function(error,result){
+            if(error){
+                return res.status(200).json({
+                    ok: false, mensaje:'Error al crear usuario', errors: error
+                });
+            }else{
+                res.status(201).json({
+                    ok: true, usuario: result
+                });
+            }
+        });
+    }
 });
