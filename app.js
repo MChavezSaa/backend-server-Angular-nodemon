@@ -3,6 +3,7 @@ var express= require('express');
 const mysql = require('mysql');
 const bodyParser = require('body-parser');
 const fileUpload = require('express-fileupload');
+var bcrypt = require('bcrypt');
 //inicializar variables
 var app = express();
 
@@ -149,3 +150,60 @@ app.get('/',(req,res, next)=>{
         mensaje: 'Petición realizada correctamente'
     })
 } );
+
+app.post('/usuario', function(req,res){
+    let datosUsuario = {
+        //userId: campo auto incremental
+        userName: req.body.name,
+        userEmail: req.body.email,
+        userPassword: bcrypt.hashSync(req.body.password, 10),
+        userImg: req.body.img,
+        userRole: req.body.role
+    }; 
+    if(mc){
+        mc.query("INSERT INTO usuarios SET ?", datosUsuario, function(error,result){
+            if(error){
+                return res.status(200).json({
+                    ok: false, mensaje:'Error al crear usuario', errors: error
+                });
+            }else{
+                res.status(201).json({
+                    ok: true, usuario: result
+                });
+            }
+        });
+    }
+});
+
+app.post('/login', (req, res)=>{
+    var body = req.body;
+    mc.query("SELECT * FROM usuarios WHERE userEmail = ?", body.email, function(error, results, fields){
+        if(error){
+            return res.status(500).json({
+                ok: false,
+                mensaje: 'Error al buscar usuario',
+                errors: err
+            });
+        }
+        if(!results){
+            return res.status(400).json({
+                ok: false,
+                mensaje: 'Credenciales incorrectas - email',
+                errors: err
+            });
+        }
+            console.log(results); 
+            if(!bcrypt.compareSync(body.password, results[0].userPassword)){
+                return res.status(400).json({
+                    ok: false,
+                    mensaje: 'Credenciales incorrectas - password',
+                    errors: error
+                })
+            }
+            res.status(200).json({
+                ok: true,
+                usuario: results,
+                id:results[0].userId
+            });        
+    });
+});
