@@ -126,7 +126,7 @@ app.put('/producto/:id', (req, res) => {
     let id = req.params.id;
     let producto = req.body;
     if (!id || !producto) {
-        return res.status(400).send({ error: producto, message: 'Debe proveer un id y los datos de un producto' })
+        return res.status(400).send({ error: producto, message: 'Debe proveer un id y los datos de un producto' });
     }
     mc.query("UPDATE Productos SET ? WHERE productId = ?", [producto, id], function(error, result, fields) {
         if (error) throw error;
